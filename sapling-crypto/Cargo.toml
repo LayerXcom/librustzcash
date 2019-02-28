@@ -17,6 +17,8 @@ bellman = { path = "../bellman" }
 rand = "0.4"
 digest = "0.7"
 byteorder = "1"
+jubjub = { git = "https://github.com/LayerXcom/zero-chain"}
+zero-chain-pairing = { git = "https://github.com/LayerXcom/zero-chain"}
 
 [dependencies.blake2-rfc]
 git = "https://github.com/gtank/blake2-rfc"

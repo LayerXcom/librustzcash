@@ -4,6 +4,8 @@ use pairing::LegendreSymbol::*;
 use pairing::{adc, sbb, mac_with_carry};
 
 use super::ToUniform;
+use zjubjub::curve::fs::Fs as zFs;
+use zpairing::PrimeField as zPrimeField;
 
 // s = 6554484396890773809930967563523245729705921265872317281365359162392183254199
 const MODULUS: FsRepr = FsRepr([0xd0970e5ed6f72cb7, 0xa6682093ccc81082, 0x6673b0101343b00, 0xe7db4ea6533afa9]);
@@ -79,6 +81,13 @@ impl From<u64> for FsRepr {
         let mut repr = Self::default();
         repr.0[0] = val;
         repr
+    }
+}
+
+impl From<zFs> for Fs {
+    fn from(val: zFs) -> Fs {
+        let z_fs_repr = val.into_repr();
+        Fs::from_repr(FsRepr(z_fs_repr.0)).unwrap()
     }
 }
 
