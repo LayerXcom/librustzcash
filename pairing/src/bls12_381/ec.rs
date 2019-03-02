@@ -1626,8 +1626,8 @@ pub mod g2 {
 
     impl RW for G2Prepared {
         fn write<W: ::io::Write>(&self, mut writer: &mut W) -> ::io::Result<()> {
-            for coeffs in &self.coeffs { 
-                println!("A");
+            for (i, coeffs) in self.coeffs.iter().enumerate() { 
+                println!("coeffs len: {}", i);
                 coeffs.0.write(&mut writer)?;
                 coeffs.1.write(&mut writer)?;
                 coeffs.2.write(&mut writer)?;
