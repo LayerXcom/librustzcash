@@ -4,8 +4,6 @@ extern crate blake2_rfc;
 extern crate digest;
 extern crate rand;
 extern crate byteorder;
-extern crate jubjub as zjubjub;
-extern crate zero_chain_pairing as zpairing;
 
 #[cfg(test)]
 #[macro_use]
