@@ -1626,6 +1626,12 @@ pub mod g2 {
 
     impl RW for G2Prepared {
         fn write<W: ::io::Write>(&self, mut writer: &mut W) -> ::io::Result<()> {
+            use byteorder::{ByteOrder, BigEndian};
+            let mut buf = [0u8; 4];
+
+            BigEndian::write_u32(&mut buf, self.coeffs.len() as u32);
+            writer.write(&buf)?;
+            
             for (i, coeffs) in self.coeffs.iter().enumerate() { 
                 println!("coeffs len: {}", i);
                 coeffs.0.write(&mut writer)?;
