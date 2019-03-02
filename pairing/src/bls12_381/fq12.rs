@@ -2,7 +2,7 @@ use super::fq::FROBENIUS_COEFF_FQ12_C1;
 use super::fq2::Fq2;
 use super::fq6::Fq6;
 use rand::{Rand, Rng};
-use Field;
+use {Field, RW};
 
 /// An element of Fq12, represented by c0 + c1 * w.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -23,6 +23,14 @@ impl Rand for Fq12 {
             c0: rng.gen(),
             c1: rng.gen(),
         }
+    }
+}
+
+impl RW for Fq12 {
+    fn write<W: ::io::Write>(&self, writer: &mut W) -> ::io::Result<()> {	    
+        self.c0.write(writer)?;
+        self.c1.write(writer)?;
+        Ok(())
     }
 }
 

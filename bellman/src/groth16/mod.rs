@@ -1,7 +1,8 @@
 use pairing::{
     Engine,
     CurveAffine,
-    EncodedPoint
+    EncodedPoint,
+    RW
 };
 
 use ::{
@@ -390,6 +391,24 @@ pub struct PreparedVerifyingKey<E: Engine> {
     neg_delta_g2: <E::G2Affine as CurveAffine>::Prepared,
     /// Copy of IC from `VerifiyingKey`.
     ic: Vec<E::G1Affine>
+}
+
+impl<E: Engine> PreparedVerifyingKey<E> {
+    pub fn write<W: io::Write> (
+        &self,
+        writer: &mut W
+    ) -> io::Result<()>
+    {
+        self.alpha_g1_beta_g2.write(writer)?;
+        self.neg_gamma_g2.write(writer)?;
+        self.neg_delta_g2.write(writer)?; 
+
+        for ic in &self.ic {
+            writer.write_all(ic.into_uncompressed().as_ref())?;
+        }
+
+        Ok(())
+    }
 }
 
 pub trait ParameterSource<E: Engine> {

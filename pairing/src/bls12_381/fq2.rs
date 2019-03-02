@@ -1,6 +1,6 @@
 use super::fq::{FROBENIUS_COEFF_FQ2_C1, Fq, NEGATIVE_ONE};
 use rand::{Rand, Rng};
-use {Field, SqrtField};
+use {Field, SqrtField, PrimeField, PrimeFieldRepr};
 
 use std::cmp::Ordering;
 
@@ -37,6 +37,12 @@ impl PartialOrd for Fq2 {
 }
 
 impl Fq2 {
+    pub fn write<W: ::io::Write>(&self, mut writer: &mut W) -> ::io::Result<()> {
+        self.c0.into_repr().write_be(&mut writer)?;
+        self.c1.into_repr().write_be(&mut writer)?;
+        Ok(())	        
+    }
+
     /// Multiply this element by the cubic and quadratic nonresidue 1 + u.
     pub fn mul_by_nonresidue(&mut self) {
         let t0 = self.c0;
@@ -65,7 +71,7 @@ impl Rand for Fq2 {
     }
 }
 
-impl Field for Fq2 {
+impl Field for Fq2 {    
     fn zero() -> Self {
         Fq2 {
             c0: Fq::zero(),

@@ -627,7 +627,7 @@ pub mod g1 {
     use std::fmt;
     use {
         BitIterator, CurveAffine, CurveProjective, EncodedPoint, Engine, Field, GroupDecodingError,
-        PrimeField, PrimeFieldRepr, SqrtField,
+        PrimeField, PrimeFieldRepr, SqrtField, RW,
     };
 
     curve_impl!(
@@ -933,6 +933,12 @@ pub mod g1 {
             G1Prepared(p)
         }
     }
+
+    impl RW for G1Prepared {
+        fn write<W: ::io::Write>(&self, writer: &mut W) -> ::io::Result<()> {
+            unimplemented!();
+        }
+    }	       
 
     #[test]
     fn g1_generator() {
@@ -1274,7 +1280,7 @@ pub mod g2 {
     use std::fmt;
     use {
         BitIterator, CurveAffine, CurveProjective, EncodedPoint, Engine, Field, GroupDecodingError,
-        PrimeField, PrimeFieldRepr, SqrtField,
+        PrimeField, PrimeFieldRepr, SqrtField, RW
     };
 
     curve_impl!(
@@ -1616,6 +1622,21 @@ pub mod g2 {
     pub struct G2Prepared {
         pub(crate) coeffs: Vec<(Fq2, Fq2, Fq2)>,
         pub(crate) infinity: bool,
+    }
+
+    impl RW for G2Prepared {
+        fn write<W: ::io::Write>(&self, mut writer: &mut W) -> ::io::Result<()> {
+            for coeffs in &self.coeffs { 
+                coeffs.0.write(&mut writer)?;
+                coeffs.1.write(&mut writer)?;
+                coeffs.2.write(&mut writer)?;
+            }
+            match self.infinity {
+                true => writer.write_all(&[1u8])?,
+                false => writer.write_all(&[0u8])?
+            }
+            Ok(())
+        }        
     }
 
     #[test]
