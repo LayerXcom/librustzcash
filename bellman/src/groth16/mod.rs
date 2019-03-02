@@ -394,25 +394,25 @@ pub struct PreparedVerifyingKey<E: Engine> {
 }
 
 impl<E: Engine> PreparedVerifyingKey<E> {
-    pub fn write<W: io::Write + std::iter::ExactSizeIterator> (
+    pub fn write<W: io::Write> (
         &self,
         writer: &mut W
     ) -> io::Result<()>
     {
-        self.alpha_g1_beta_g2.write(writer)?;
-        println!("alpha_g1_beta_g2(len): {:?}", writer.len());
+        self.alpha_g1_beta_g2.write(writer)?;        
+        // println!("alpha_g1_beta_g2(len): {:?}", v.len());
         // println!("alpha_g1_beta_g2: {:?}", writer);
         self.neg_gamma_g2.write(writer)?;
-        println!("neg_gamma_g2(len): {:?}", writer.len());
+        // println!("neg_gamma_g2(len): {:?}", writer.len());
         // println!("neg_gamma_g2: {:?}", writer);
         self.neg_delta_g2.write(writer)?; 
-        println!("neg_delta_g2(len): {:?}", writer.len());
+        // println!("neg_delta_g2(len): {:?}", writer.len());
         // println!("neg_delta_g2: {:?}", writer);
 
         for ic in &self.ic {
             writer.write_all(ic.into_uncompressed().as_ref())?;
         }
-        println!("ic(len): {:?}", writer.len());
+        // println!("ic(len): {:?}", writer.len());
 
         Ok(())
     }
