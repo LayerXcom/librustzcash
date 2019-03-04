@@ -25,7 +25,7 @@ pub use self::generator::*;
 pub use self::prover::*;
 pub use self::verifier::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Proof<E: Engine> {
     pub a: E::G1Affine,
     pub b: E::G2Affine,
@@ -98,7 +98,7 @@ impl<E: Engine> Proof<E> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VerifyingKey<E: Engine> {
     // alpha in g1 for verifying and for creating A/C elements of
     // proof. Never the point at infinity.
@@ -213,7 +213,7 @@ impl<E: Engine> VerifyingKey<E> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Parameters<E: Engine> {
     pub vk: VerifyingKey<E>,
 
