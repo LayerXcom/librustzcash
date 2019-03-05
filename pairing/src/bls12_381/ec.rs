@@ -1632,8 +1632,7 @@ pub mod g2 {
             BigEndian::write_u32(&mut buf, self.coeffs.len() as u32);
             writer.write(&buf)?;
             
-            for (i, coeffs) in self.coeffs.iter().enumerate() { 
-                println!("coeffs len: {}", i);
+            for (i, coeffs) in self.coeffs.iter().enumerate() {                 
                 coeffs.0.write(&mut writer)?;
                 coeffs.1.write(&mut writer)?;
                 coeffs.2.write(&mut writer)?;
