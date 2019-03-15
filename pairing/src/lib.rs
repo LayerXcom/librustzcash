@@ -33,7 +33,7 @@ use std::io::{self, Read, Write};
 /// of prime order `r`, and are equipped with a bilinear pairing function.
 pub trait Engine: Sized + 'static + Clone {
     /// This is the scalar field of the G1/G2 groups.
-    type Fr: PrimeField + SqrtField;
+    type Fr: PrimeField + SqrtField + fmt::Debug;
 
     /// The projective representation of an element in G1.
     type G1: CurveProjective<
@@ -129,7 +129,7 @@ pub trait CurveProjective:
     + 'static
 {
     type Engine: Engine<Fr = Self::Scalar>;
-    type Scalar: PrimeField + SqrtField;
+    type Scalar: PrimeField + SqrtField + fmt::Debug;
     type Base: SqrtField;
     type Affine: CurveAffine<Projective = Self, Scalar = Self::Scalar>;
 
@@ -190,7 +190,7 @@ pub trait CurveAffine:
     Copy + Clone + Sized + Send + Sync + fmt::Debug + fmt::Display + PartialEq + Eq + 'static
 {
     type Engine: Engine<Fr = Self::Scalar>;
-    type Scalar: PrimeField + SqrtField;
+    type Scalar: PrimeField + SqrtField + fmt::Debug;
     type Base: SqrtField;
     type Projective: CurveProjective<Affine = Self, Scalar = Self::Scalar>;
     type Prepared: Clone + Send + Sync + 'static + RW;
