@@ -8,7 +8,7 @@ use std::io::{self, Read, Write};
 use jubjub::{FixedGenerators, JubjubEngine, JubjubParams, Unknown, edwards::Point};
 use util::{hash_to_scalar};
 
-fn read_scalar<E: JubjubEngine, R: Read>(reader: R) -> io::Result<E::Fs> {
+pub fn read_scalar<E: JubjubEngine, R: Read>(reader: R) -> io::Result<E::Fs> {
     let mut s_repr = <E::Fs as PrimeField>::Repr::default();
     s_repr.read_le(reader)?;
 
@@ -21,18 +21,18 @@ fn read_scalar<E: JubjubEngine, R: Read>(reader: R) -> io::Result<E::Fs> {
     }
 }
 
-fn write_scalar<E: JubjubEngine, W: Write>(s: &E::Fs, writer: W) -> io::Result<()> {
+pub fn write_scalar<E: JubjubEngine, W: Write>(s: &E::Fs, writer: W) -> io::Result<()> {
     s.into_repr().write_le(writer)
 }
 
-fn h_star<E: JubjubEngine>(a: &[u8], b: &[u8]) -> E::Fs {
+pub fn h_star<E: JubjubEngine>(a: &[u8], b: &[u8]) -> E::Fs {
     hash_to_scalar::<E>(b"Zcash_RedJubjubH", a, b)
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct Signature {
-    rbar: [u8; 32],
-    sbar: [u8; 32],
+    pub rbar: [u8; 32],
+    pub sbar: [u8; 32],
 }
 
 #[derive(Debug)]
