@@ -140,6 +140,7 @@ impl JubjubEngine for Bls12 {
     type Params = JubjubBls12;
 }
 
+#[derive(PartialEq)]
 pub struct JubjubBls12 {
     edwards_d: Fr,
     montgomery_a: Fr,
