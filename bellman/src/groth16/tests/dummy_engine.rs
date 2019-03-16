@@ -9,7 +9,8 @@ use pairing::{
     CurveAffine,
     PrimeFieldDecodingError,
     GroupDecodingError,
-    EncodedPoint
+    EncodedPoint,
+    RW
 };
 
 use std::cmp::Ordering;
@@ -21,6 +22,12 @@ const MODULUS_R: Wrapping<u32> = Wrapping(64513);
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Fr(Wrapping<u32>);
+
+impl RW for Fr {
+    fn write<W: ::io::Write>(&self, writer: &mut W) -> ::io::Result<()> {
+        unimplemented!();
+    }
+}
 
 impl fmt::Display for Fr {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
