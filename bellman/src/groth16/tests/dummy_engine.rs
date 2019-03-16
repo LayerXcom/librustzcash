@@ -27,6 +27,11 @@ impl RW for Fr {
     fn write<W: ::io::Write>(&self, writer: &mut W) -> ::io::Result<()> {
         unimplemented!();
     }
+
+    fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
+        unimplemented!();
+    }
+
 }
 
 impl fmt::Display for Fr {
