@@ -411,6 +411,42 @@ impl<E: Engine> PreparedVerifyingKey<E> {
 
         Ok(())
     }
+
+    pub fn read<R: io::Read> (
+        reader: &mut R
+    ) -> io::Result<Self>
+    {
+        let mut g1_repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();
+        let alpha_g1_beta_g2 = E::Fqk::read(reader)?;
+        
+        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(reader)?;
+        let neg_delta_g2 = <E::G2Affine as CurveAffine>::Prepared::read(reader)?;
+
+        let ic_len = reader.read_u32::<BigEndian>()? as usize;
+
+        let mut ic = vec![];
+
+        for _ in 0..ic_len {            
+            reader.read(g1_repr.as_mut())?;            
+            let g1 = g1_repr
+                        .into_affine()
+                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+                        .and_then(|e| if e.is_zero() {                            
+                            Err(io::Error::new(io::ErrorKind::InvalidData, "point at infinity"))
+                        } else {
+                            Ok(e)
+                        })?;
+                        
+            ic.push(g1);
+        }
+
+        Ok(PreparedVerifyingKey {
+            alpha_g1_beta_g2: alpha_g1_beta_g2,
+            neg_gamma_g2: neg_gamma_g2,
+            neg_delta_g2: neg_delta_g2,
+            ic: ic,
+        })
+    }
 }
 
 pub trait ParameterSource<E: Engine> {

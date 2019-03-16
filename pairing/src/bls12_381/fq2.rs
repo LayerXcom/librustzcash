@@ -1,4 +1,4 @@
-use super::fq::{FROBENIUS_COEFF_FQ2_C1, Fq, NEGATIVE_ONE};
+use super::fq::{FROBENIUS_COEFF_FQ2_C1, Fq, NEGATIVE_ONE, FqRepr};
 use rand::{Rand, Rng};
 use {Field, SqrtField, PrimeField, PrimeFieldRepr};
 
@@ -41,6 +41,26 @@ impl Fq2 {
         self.c0.into_repr().write_be(&mut writer)?;
         self.c1.into_repr().write_be(&mut writer)?;
         Ok(())	        
+    }
+
+    pub fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
+        let mut repr0 = FqRepr::default();
+        let mut repr1 = FqRepr::default();
+
+        let mut buf = vec![];
+        reader.read(&mut buf).unwrap();
+
+        repr0.read_be(&mut &buf[..])?;
+        repr1.read_be(&mut &buf[..])?;     
+        
+        Fq::from_repr(repr0).and_then(|r0|
+            Fq::from_repr(repr1).and_then(|r1|
+                Ok(Fq2{
+                    c0: r0,
+                    c1: r1
+                })
+            )
+        ).map_err(|e| ::io::Error::new(::io::ErrorKind::InvalidData, e))       
     }
 
     /// Multiply this element by the cubic and quadratic nonresidue 1 + u.

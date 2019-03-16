@@ -938,6 +938,10 @@ pub mod g1 {
         fn write<W: ::io::Write>(&self, writer: &mut W) -> ::io::Result<()> {
             unimplemented!();
         }
+
+        fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
+            unimplemented!();
+        }
     }	       
 
     #[test]
@@ -1643,6 +1647,40 @@ pub mod g2 {
             }
             Ok(())
         }        
+
+        fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
+            use byteorder::{ByteOrder, BigEndian};
+
+            let mut buf = [0u8; 4];
+            reader.read(&mut buf)?;
+
+            let coeffs_len = BigEndian::read_u32(&buf) as usize;
+
+            let mut coeffs = ::std::vec::Vec::with_capacity(coeffs_len);
+
+            for _ in 0..coeffs_len {
+                let mut a = Fq2::read(reader)?;
+                let mut b = Fq2::read(reader)?;
+                let mut c = Fq2::read(reader)?;
+
+                coeffs.push((a, b, c));
+            }            
+
+            let res;
+            let mut d = [0u8; 1];
+            reader.read(&mut d)?;            
+            
+            match d[0] {
+                1 => res = true,
+                0 => res = false,
+                _ => return Err(::io::Error::new(::io::ErrorKind::InvalidData, "Invalid"))
+            }
+
+            Ok(G2Prepared{
+                coeffs: coeffs,
+                infinity: res,
+            })
+        }
     }
 
     #[test]
