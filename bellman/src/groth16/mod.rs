@@ -413,14 +413,14 @@ impl<E: Engine> PreparedVerifyingKey<E> {
     }
 
     pub fn read<R: io::Read> (
-        reader: &mut R
+        mut reader: R
     ) -> io::Result<Self>
     {
         let mut g1_repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();
-        let alpha_g1_beta_g2 = E::Fqk::read(reader)?;
+        let alpha_g1_beta_g2 = E::Fqk::read(&mut reader)?;
         
-        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(reader)?;
-        let neg_delta_g2 = <E::G2Affine as CurveAffine>::Prepared::read(reader)?;
+        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;
+        let neg_delta_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;
 
         let ic_len = reader.read_u32::<BigEndian>()? as usize;
 
