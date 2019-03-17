@@ -111,7 +111,7 @@ pub trait Engine: Sized + 'static + Clone {
 
 pub trait RW: Sized {
     fn write<W: io::Write>(&self, writer: &mut W) -> io::Result<()>;
-    fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self>;
+    fn read<R: io::Read>(reader: &mut R) -> io::Result<Self>;
 }
 
 /// Projective representation of an elliptic curve point guaranteed to be
@@ -194,7 +194,7 @@ pub trait CurveAffine:
     type Scalar: PrimeField + SqrtField + fmt::Debug;
     type Base: SqrtField;
     type Projective: CurveProjective<Affine = Self, Scalar = Self::Scalar>;
-    type Prepared: Clone + Send + Sync + 'static + RW;
+    type Prepared: Clone + Send + Sync + 'static + RW + PartialEq + fmt::Debug;
     type Uncompressed: EncodedPoint<Affine = Self>;
     type Compressed: EncodedPoint<Affine = Self>;
     type Pair: CurveAffine<Pair = Self>;

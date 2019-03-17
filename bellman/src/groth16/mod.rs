@@ -382,6 +382,7 @@ impl<E: Engine> Parameters<E> {
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub struct PreparedVerifyingKey<E: Engine> {
     /// Pairing result of alpha*beta
     alpha_g1_beta_g2: E::Fqk,
@@ -416,15 +417,15 @@ impl<E: Engine> PreparedVerifyingKey<E> {
         mut reader: R
     ) -> io::Result<Self>
     {
-        let mut g1_repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();
-        let alpha_g1_beta_g2 = E::Fqk::read(&mut reader)?;
-        
-        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;
+        let mut g1_repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();        
+        let alpha_g1_beta_g2 = E::Fqk::read(&mut reader)?; 
+
+        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;        
         let neg_delta_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;
 
         let ic_len = reader.read_u32::<BigEndian>()? as usize;
 
-        let mut ic = vec![];
+        let mut ic = vec![];        
 
         for _ in 0..ic_len {            
             reader.read(g1_repr.as_mut())?;            
@@ -542,10 +543,12 @@ impl<'a, E: Engine> ParameterSource<E> for &'a Parameters<E> {
 mod test_with_bls12_381 {
     use super::*;
     use {Circuit, SynthesisError, ConstraintSystem};
-
     use rand::{Rand, thread_rng};
     use pairing::{Field};
     use pairing::bls12_381::{Bls12, Fr};
+    use std::path::Path;
+    use std::fs::File;
+    use std::io::{BufReader, Read}; 
 
     #[test]
     fn serialization() {
@@ -629,5 +632,25 @@ mod test_with_bls12_381 {
             assert!(verify_proof(&pvk, &proof, &[c]).unwrap());
             assert!(!verify_proof(&pvk, &proof, &[a]).unwrap());
         }
+    }
+
+    #[test]
+    fn test_prepared_vk_rw() {
+        let vk_path = Path::new("./verification.params"); 
+        let vk_file = File::open(&vk_path).unwrap();
+        let mut vk_reader = BufReader::new(vk_file);
+
+        let mut buf_vk = vec![];
+        vk_reader.read_to_end(&mut buf_vk).unwrap();        
+        
+
+        let prepared_vk_a = PreparedVerifyingKey::<Bls12>::read(&mut &buf_vk[..]).unwrap();
+
+        let mut buf = vec![];
+        prepared_vk_a.write(&mut &mut buf).unwrap();
+
+        let prepared_vk_b = PreparedVerifyingKey::<Bls12>::read(&mut &buf[..]).unwrap();        
+
+        assert_eq!(prepared_vk_a, prepared_vk_b);
     }
 }

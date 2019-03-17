@@ -35,7 +35,7 @@ impl RW for Fq12 {
 
     fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
         let a = Fq6::read(reader)?;
-        let b = Fq6::read(reader)?;
+        let b = Fq6::read(reader)?;        
 
         Ok(Fq12{
             c0: a,
