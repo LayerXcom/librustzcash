@@ -167,7 +167,7 @@ impl<'a, E: Engine> Circuit<E> for MiMCDemo<'a, E> {
 }
 
 #[test]
-fn test_mimc() {
+fn mimc_tokio_threadpool() {
     // This may not be cryptographically safe, use
     // `OsRng` (for example) in production software.
     let rng = &mut thread_rng();
