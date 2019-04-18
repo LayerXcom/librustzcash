@@ -8,7 +8,7 @@ extern crate crossbeam;
 extern crate byteorder;
 
 pub mod multicore;
-mod multiexp;
+pub mod multiexp;
 pub mod domain;
 pub mod groth16;
 

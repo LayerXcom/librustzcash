@@ -7,7 +7,6 @@
 use num_cpus;
 use futures::{Future, IntoFuture, Poll};
 use futures::future::lazy;
-// use futures_cpupool::{CpuPool, CpuFuture};
 use crossbeam::{self, Scope};
 use tokio_threadpool::*;
 
