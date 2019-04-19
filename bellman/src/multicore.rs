@@ -7,7 +7,7 @@
 use num_cpus;
 use futures::{Future, IntoFuture, Poll};
 use futures_cpupool::{CpuPool, CpuFuture};
-use crossbeam::{self, Scope};
+use crossbeam::thread::Scope;
 
 #[derive(Clone)]
 pub struct Worker {
@@ -63,7 +63,7 @@ impl Worker {
 
         crossbeam::scope(|scope| {
             f(scope, chunk_size)
-        })
+        }).expect("must run")
     }
 }
 

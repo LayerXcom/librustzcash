@@ -93,7 +93,7 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
             let minv = self.minv;
 
             for v in self.coeffs.chunks_mut(chunk) {
-                scope.spawn(move || {
+                scope.spawn(move |_| {
                     for v in v {
                         v.group_mul_assign(&minv);
                     }
@@ -106,7 +106,7 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
     {
         worker.scope(self.coeffs.len(), |scope, chunk| {
             for (i, v) in self.coeffs.chunks_mut(chunk).enumerate() {
-                scope.spawn(move || {
+                scope.spawn(move |_| {
                     let mut u = g.pow(&[(i * chunk) as u64]);
                     for v in v.iter_mut() {
                         v.group_mul_assign(&u);
@@ -149,7 +149,7 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
 
         worker.scope(self.coeffs.len(), |scope, chunk| {
             for v in self.coeffs.chunks_mut(chunk) {
-                scope.spawn(move || {
+                scope.spawn(move |_| {
                     for v in v {
                         v.group_mul_assign(&i);
                     }
@@ -164,7 +164,7 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
 
         worker.scope(self.coeffs.len(), |scope, chunk| {
             for (a, b) in self.coeffs.chunks_mut(chunk).zip(other.coeffs.chunks(chunk)) {
-                scope.spawn(move || {
+                scope.spawn(move |_| {
                     for (a, b) in a.iter_mut().zip(b.iter()) {
                         a.group_mul_assign(&b.0);
                     }
@@ -179,7 +179,7 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
 
         worker.scope(self.coeffs.len(), |scope, chunk| {
             for (a, b) in self.coeffs.chunks_mut(chunk).zip(other.coeffs.chunks(chunk)) {
-                scope.spawn(move || {
+                scope.spawn(move |_| {
                     for (a, b) in a.iter_mut().zip(b.iter()) {
                         a.group_sub_assign(&b);
                     }
@@ -333,7 +333,7 @@ fn parallel_fft<E: Engine, T: Group<E>>(
         let a = &*a;
 
         for (j, tmp) in tmp.iter_mut().enumerate() {
-            scope.spawn(move || {
+            scope.spawn(move |_| {
                 // Shuffle into a sub-FFT
                 let omega_j = omega.pow(&[j as u64]);
                 let omega_step = omega.pow(&[(j as u64) << log_new_n]);
@@ -361,7 +361,7 @@ fn parallel_fft<E: Engine, T: Group<E>>(
         let tmp = &tmp;
 
         for (idx, a) in a.chunks_mut(chunk).enumerate() {
-            scope.spawn(move || {
+            scope.spawn(move |_| {
                 let mut idx = idx * chunk;
                 let mask = (1 << log_cpus) - 1;
                 for a in a {
