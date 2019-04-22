@@ -2,6 +2,7 @@
 members = [
     "bellman",
     "bellman-zc",
+    "bellman-st",
     "librustzcash",
     "pairing",
     "sapling-crypto",
