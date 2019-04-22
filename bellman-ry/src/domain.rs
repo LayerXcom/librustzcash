@@ -22,6 +22,7 @@ use super::{
 };
 
 use super::multicore::Worker;
+use rayon::prelude::*;
 
 pub struct EvaluationDomain<E: Engine, G: Group<E>> {
     coeffs: Vec<G>,
@@ -80,57 +81,6 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
         })
     }
 
-    // this one does expect coefficients to be smaller than `num_roots_of_unity/2` as we expect multiplication
-    pub fn from_coeffs_into_sized(mut coeffs: Vec<G>, size: usize) -> Result<EvaluationDomain<E, G>, SynthesisError>
-    {
-        // Compute the size of our evaluation domain
-
-        assert!(size >= coeffs.len());
-
-        let coeffs_len = size;
-
-        // m is a size of domain where Z polynomial does NOT vanish
-        // in normal domain Z is in a form of (X-1)(X-2)...(X-N)
-        let mut m = 1;
-        let mut exp = 0;
-        let mut omega = E::Fr::root_of_unity();
-        let max_degree = (1 << E::Fr::S) - 1;
-
-        if coeffs_len > max_degree {
-            return Err(SynthesisError::PolynomialDegreeTooLarge)
-        }
-
-        while m < coeffs_len {
-            m *= 2;
-            exp += 1;
-
-            // The pairing-friendly curve may not be able to support
-            // large enough (radix2) evaluation domains.
-            if exp > E::Fr::S {
-                return Err(SynthesisError::PolynomialDegreeTooLarge)
-            }
-        }
-
-        // If full domain is not needed - limit it,
-        // e.g. if (2^N)th power is not required, just double omega and get 2^(N-1)th
-        // Compute omega, the 2^exp primitive root of unity
-        for _ in exp..E::Fr::S {
-            omega.square();
-        }
-
-        // Extend the coeffs vector with zeroes if necessary
-        coeffs.resize(m, G::group_zero());
-
-        Ok(EvaluationDomain {
-            coeffs: coeffs,
-            exp: exp,
-            omega: omega,
-            omegainv: omega.inverse().unwrap(),
-            geninv: E::Fr::multiplicative_generator().inverse().unwrap(),
-            minv: E::Fr::from_str(&format!("{}", m)).unwrap().inverse().unwrap()
-        })
-    }
-
     pub fn fft(&mut self, worker: &Worker)
     {
         best_fft(&mut self.coeffs, worker, &self.omega, self.exp);
@@ -140,6 +90,17 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
     {
         best_fft(&mut self.coeffs, worker, &self.omegainv, self.exp);
 
+        // worker.scope(self.coeffs.len(), |scope, chunk| {
+        //     let minv = self.minv;
+
+        //     for v in self.coeffs.chunks_mut(chunk) {
+        //         scope.spawn(move |_| {
+        //             for v in v {
+        //                 v.group_mul_assign(&minv);
+        //             }
+        //         });
+        //     }
+        // });
         worker.scope(self.coeffs.len(), |scope, chunk| {
             let minv = self.minv;
 
@@ -151,6 +112,9 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
                 });
             }
         });
+        
+        self.coeffs.par_iter_mut()
+            .for_each(|v| v.group_mul_assign(&minv));
     }
 
     pub fn distribute_powers(&mut self, worker: &Worker, g: E::Fr)
@@ -166,6 +130,8 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
                 });
             }
         });
+
+
     }
 
     pub fn coset_fft(&mut self, worker: &Worker)
