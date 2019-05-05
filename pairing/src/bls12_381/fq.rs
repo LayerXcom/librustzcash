@@ -707,8 +707,14 @@ impl PrimeFieldRepr for FqRepr {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Fq(FqRepr);
+
+impl ::std::fmt::Debug for Fq {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{}({:?})", stringify!(Fq), self.into_repr())
+    }
+}
 
 /// `Fq` elements are ordered lexicographically.
 impl Ord for Fq {

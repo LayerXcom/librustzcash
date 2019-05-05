@@ -254,8 +254,14 @@ impl PrimeFieldRepr for FrRepr {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Fr(FrRepr);
+
+impl ::std::fmt::Debug for Fr {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{}({:?})", stringify!(Fr), self.into_repr())
+    }
+}
 
 impl ::std::fmt::Display for Fr {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
