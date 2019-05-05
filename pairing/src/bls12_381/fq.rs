@@ -507,8 +507,19 @@ pub const NEGATIVE_ONE: Fq = Fq(FqRepr([
     0x40ab3263eff0206,
 ]));
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct FqRepr(pub [u64; 6]);
+
+impl ::std::fmt::Debug for FqRepr {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        try!(write!(f, "0x"));
+        for i in self.0.iter().rev() {
+            try!(write!(f, "{:016x}", *i));
+        }
+
+        Ok(())
+    }
+}
 
 impl ::rand::Rand for FqRepr {
     #[inline(always)]
