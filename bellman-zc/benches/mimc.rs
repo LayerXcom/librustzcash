@@ -91,7 +91,7 @@ mod threadpool {
         verify_proof,
     };
 
-    /// Our demo circuit implements this `Circuit` trait which
+/// Our demo circuit implements this `Circuit` trait which
 /// is used during paramgen and proving in order to
 /// synthesize the constraint system.
 impl<'a, E: Engine> Circuit<E> for MiMCDemo<'a, E> {
@@ -796,5 +796,3 @@ impl<'a, E: Engine> Circuit<E> for MiMCDemo<'a, E> {
         });
     }
 }
-
-

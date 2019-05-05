@@ -90,17 +90,6 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
     {
         best_fft(&mut self.coeffs, worker, &self.omegainv, self.exp);
 
-        // worker.scope(self.coeffs.len(), |scope, chunk| {
-        //     let minv = self.minv;
-
-        //     for v in self.coeffs.chunks_mut(chunk) {
-        //         scope.spawn(move |_| {
-        //             for v in v {
-        //                 v.group_mul_assign(&minv);
-        //             }
-        //         });
-        //     }
-        // });
         worker.scope(self.coeffs.len(), |scope, chunk| {
             let minv = self.minv;
 
@@ -112,9 +101,6 @@ impl<E: Engine, G: Group<E>> EvaluationDomain<E, G> {
                 });
             }
         });
-        
-        self.coeffs.par_iter_mut()
-            .for_each(|v| v.group_mul_assign(&minv));
     }
 
     pub fn distribute_powers(&mut self, worker: &Worker, g: E::Fr)

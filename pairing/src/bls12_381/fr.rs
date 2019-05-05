@@ -54,8 +54,19 @@ const ROOT_OF_UNITY: FrRepr = FrRepr([
     0x5bf3adda19e9b27b,
 ]);
 
-#[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub struct FrRepr(pub [u64; 4]);
+
+impl ::std::fmt::Debug for FrRepr {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        try!(write!(f, "0x"));
+        for i in self.0.iter().rev() {
+            try!(write!(f, "{:016x}", *i));
+        }
+
+        Ok(())
+    }
+}
 
 impl ::rand::Rand for FrRepr {
     #[inline(always)]
