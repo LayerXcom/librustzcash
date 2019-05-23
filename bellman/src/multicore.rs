@@ -1,20 +1,30 @@
 //! This is an interface for dealing with the kinds of
 //! parallel computations involved in bellman. It's
-//! currently just a thin wrapper around CpuPool and
+//! currently just an optional thin wrapper around CpuPool and
 //! crossbeam but may be extended in the future to
 //! allow for various parallelism strategies.
+//! Compile without the "multithread" feature for targets that
+//! don't support parallel computation.
 
+#[cfg(feature = "multithread")]
 use num_cpus;
 use futures::{Future, IntoFuture, Poll};
+#[cfg(feature = "multithread")]
 use futures_cpupool::{CpuPool, CpuFuture};
+#[cfg(feature = "multithread")]
 use crossbeam::thread::Scope;
 
+#[cfg(not(feature = "multithread"))]
+use futures::future::{result, FutureResult};
+
+#[cfg(feature = "multithread")]
 #[derive(Clone)]
 pub struct Worker {
     cpus: usize,
     pool: CpuPool
 }
 
+#[cfg(feature = "multithread")]
 impl Worker {
     // We don't expose this outside the library so that
     // all `Worker` instances have the same number of
@@ -67,8 +77,70 @@ impl Worker {
     }
 }
 
+#[cfg(feature = "multithread")]
 pub struct WorkerFuture<T, E> {
     future: CpuFuture<T, E>
+}
+
+//Dummy worker for single-threaded mode
+#[cfg(not(feature = "multithread"))]
+#[derive(Clone)]
+pub struct Worker {}
+
+ #[cfg(not(feature = "multithread"))]
+impl Worker {
+
+     pub fn new() -> Worker { Worker {} }
+
+     pub fn log_num_cpus(&self) -> u32 {
+        log2_floor(1)
+    }
+
+     pub fn compute<F, R>(
+        &self, f: F
+    ) -> WorkerFuture<R::Item, R::Error>
+        where F: FnOnce() -> R,
+              R: IntoFuture + 'static,
+              R::Future: Send + 'static,
+              R::Item: Send + 'static,
+              R::Error: Send + 'static
+    {
+        let future = f().into_future();
+
+         WorkerFuture {
+            future: result(future.wait())
+        }
+    }
+
+     pub fn scope<F, R>(
+        &self,
+        _elements: usize,
+        f: F
+    ) -> R
+        where F: FnOnce(&Scope, usize) -> R
+    {
+        let scope = Scope {};
+        f(&scope, 1)
+    }
+}
+
+#[cfg(not(feature = "multithread"))]
+pub struct Scope {
+}
+
+ #[cfg(not(feature = "multithread"))]
+impl Scope {
+pub fn spawn<F, T>(&self, f: F) -> T  where
+        F: FnOnce() -> T + Send , T: Send
+    {
+        f()
+    }
+
+ }
+
+ #[cfg(not(feature = "multithread"))]
+pub struct WorkerFuture<T, E> {
+    future: FutureResult<T, E>
 }
 
 impl<T: Send + 'static, E: Send + 'static> Future for WorkerFuture<T, E> {

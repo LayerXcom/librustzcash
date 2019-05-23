@@ -1,9 +1,12 @@
 extern crate pairing;
 extern crate rand;
+#[cfg(feature = "multithread")]
 extern crate num_cpus;
 extern crate futures;
+#[cfg(feature = "multithread")]
 extern crate futures_cpupool;
 extern crate bit_vec;
+#[cfg(feature = "multithread")]
 extern crate crossbeam;
 extern crate byteorder;
 
