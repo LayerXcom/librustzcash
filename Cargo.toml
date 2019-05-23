@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "bellman",
-    "bellman-zc",
+    # "bellman-zc",
     "bellman-st",
     "bellman-ry",
     "librustzcash",

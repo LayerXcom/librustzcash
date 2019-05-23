@@ -13,7 +13,7 @@ path = "../pairing"
 features = ["expose-arith"]
 
 [dependencies]
-bellman = { path = "../bellman", default-features = false }
+bellman = { path = "../bellman" }
 rand = "0.4"
 digest = "0.7"
 byteorder = "1"
@@ -27,6 +27,6 @@ hex-literal = "0.1"
 rust-crypto = "0.2"
 
 [features]
-default = ["u128-support", "multithread"]
+default = ["u128-support"]
 u128-support = ["pairing/u128-support"]
 multithread = ["bellman/multithread"]

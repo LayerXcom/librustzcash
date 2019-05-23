@@ -6,6 +6,7 @@
 //! Compile without the "multithread" feature for targets that
 //! don't support parallel computation.
 
+use std::marker::PhantomData;
 #[cfg(feature = "multithread")]
 use num_cpus;
 use futures::{Future, IntoFuture, Poll};
@@ -131,9 +132,9 @@ pub struct Scope {
  #[cfg(not(feature = "multithread"))]
 impl Scope {
 pub fn spawn<F, T>(&self, f: F) -> T  where
-        F: FnOnce() -> T + Send , T: Send
+        F: FnOnce(&Scope) -> T + Send, T: Send
     {
-        f()
+        f(&Scope{})
     }
 
  }

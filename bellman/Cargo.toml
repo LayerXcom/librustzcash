@@ -19,5 +19,5 @@ pairing = { path = "../pairing" }
 byteorder = "1"
 
 [features]
-default = ["multithread"]
+default = []
 multithread = ["futures-cpupool", "num_cpus", "crossbeam"]
