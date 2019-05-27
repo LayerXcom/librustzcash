@@ -213,11 +213,184 @@ impl<E: Engine> VerifyingKey<E> {
     }
 }
 
+fn read_g1<R: Read, E: Engine>(reader: &mut R, checked: bool) -> io::Result<E::G1Affine> {
+    let mut repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();
+    reader.read_exact(repr.as_mut())?;
+
+    if checked {
+        repr
+        .into_affine()
+    } else {
+        repr
+        .into_affine_unchecked()
+    }
+    .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+    .and_then(|e| if e.is_zero() {
+        Err(io::Error::new(io::ErrorKind::InvalidData, "point at infinity"))
+    } else {
+        Ok(e)
+    })
+}
+
+fn read_g2<R: Read, E: Engine>(reader: &mut R, checked: bool) -> io::Result<E::G2Affine> {
+    let mut repr = <E::G2Affine as CurveAffine>::Uncompressed::empty();
+    reader.read_exact(repr.as_mut())?;
+
+    if checked {
+        repr
+        .into_affine()
+    } else {
+        repr
+        .into_affine_unchecked()
+    }
+    .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+    .and_then(|e| if e.is_zero() {
+        Err(io::Error::new(io::ErrorKind::InvalidData, "point at infinity"))
+    } else {
+        Ok(e)
+    })
+}
+
+
+#[derive(Clone, Debug)]
+pub struct VkHParameters<E: Engine> {
+    pub vk: VerifyingKey<E>,
+
+    // Elements of the form ((tau^i * t(tau)) / delta) for i between 0 and
+    // m-2 inclusive. Never contains points at infinity.
+    pub h: Arc<Vec<E::G1Affine>>,
+}
+
+impl<E: Engine> VkHParameters<E> {
+    pub fn read<R: Read>(
+        mut reader: R,
+        checked: bool
+    ) -> io::Result<Self> {
+        let vk = VerifyingKey::<E>::read(&mut reader)?;
+
+        let mut h = vec![];
+
+        let len = reader.read_u32::<BigEndian>()? as usize;
+        for _ in 0..len {
+            h.push(read_g1::<R, E>(&mut reader, checked)?);
+        }
+
+        Ok(VkHParameters {
+            vk: vk,
+            h: Arc::new(h),
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct LParameters<E: Engine> {
+    // Elements of the form (beta * u_i(tau) + alpha v_i(tau) + w_i(tau)) / delta
+    // for all auxillary inputs. Variables can never be unconstrained, so this
+    // never contains points at infinity.
+    pub l: Arc<Vec<E::G1Affine>>
+}
+
+impl<E: Engine> LParameters<E> {
+    pub fn read<R: Read>(
+        mut reader: R,
+        checked: bool
+    ) -> io::Result<Self> {
+        let mut l = vec![];
+        let len = reader.read_u32::<BigEndian>()? as usize;
+
+        for _ in 0..len {
+            l.push(read_g1::<R, E>(&mut reader, checked)?);
+        }
+
+        Ok(LParameters {
+            l: Arc::new(l)
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct AParameters<E: Engine> {
+    // QAP "A" polynomials evaluated at tau in the Lagrange basis. Never contains
+    // points at infinity: polynomials that evaluate to zero are omitted from
+    // the CRS and the prover can deterministically skip their evaluation.
+    pub a: Arc<Vec<E::G1Affine>>,
+}
+
+impl<E: Engine> AParameters<E> {
+    pub fn read<R: Read>(
+        mut reader: R,
+        checked: bool
+    ) -> io::Result<Self> {
+        let mut a = vec![];
+        let len = reader.read_u32::<BigEndian>()? as usize;
+
+        for _ in 0..len {
+            a.push(read_g1::<R, E>(&mut reader, checked)?);
+        }
+
+        Ok(AParameters {
+            a: Arc::new(a)
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BG1Parameters<E: Engine> {
+    // QAP "A" polynomials evaluated at tau in the Lagrange basis. Never contains
+    // points at infinity: polynomials that evaluate to zero are omitted from
+    // the CRS and the prover can deterministically skip their evaluation.
+    pub b_g1: Arc<Vec<E::G1Affine>>,
+}
+
+impl<E: Engine> BG1Parameters<E> {
+    pub fn read<R: Read>(
+        mut reader: R,
+        checked: bool
+    ) -> io::Result<Self> {
+        let mut b_g1 = vec![];
+        let len = reader.read_u32::<BigEndian>()? as usize;
+
+        for _ in 0..len {
+            b_g1.push(read_g1::<R, E>(&mut reader, checked)?);
+        }
+
+        Ok(BG1Parameters {
+            b_g1: Arc::new(b_g1)
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BG2Parameters<E: Engine> {
+    // QAP "A" polynomials evaluated at tau in the Lagrange basis. Never contains
+    // points at infinity: polynomials that evaluate to zero are omitted from
+    // the CRS and the prover can deterministically skip their evaluation.
+    pub b_g2: Arc<Vec<E::G2Affine>>,
+}
+
+impl<E: Engine> BG2Parameters<E> {
+    pub fn read<R: Read>(
+        mut reader: R,
+        checked: bool
+    ) -> io::Result<Self> {
+        let mut b_g2 = vec![];
+        let len = reader.read_u32::<BigEndian>()? as usize;
+
+        for _ in 0..len {
+            b_g2.push(read_g2::<R, E>(&mut reader, checked)?);
+        }
+
+        Ok(BG2Parameters {
+            b_g2: Arc::new(b_g2)
+        })
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Parameters<E: Engine> {
     pub vk: VerifyingKey<E>,
 
-    // Elements of the form ((tau^i * t(tau)) / delta) for i between 0 and 
+    // Elements of the form ((tau^i * t(tau)) / delta) for i between 0 and
     // m-2 inclusive. Never contains points at infinity.
     pub h: Arc<Vec<E::G1Affine>>,
 
@@ -371,6 +544,11 @@ impl<E: Engine> Parameters<E> {
             }
         }
 
+        let mut tmp = Vec::new();
+        let k = reader.read_to_end(&mut tmp).unwrap();
+        println!("len_tmp: {:?}, a: {:?}", tmp.len(), k);
+
+
         Ok(Parameters {
             vk: vk,
             h: Arc::new(h),
@@ -399,16 +577,16 @@ impl<E: Engine> PreparedVerifyingKey<E> {
         &self,
         writer: &mut W
     ) -> io::Result<()>
-    {        
-        self.alpha_g1_beta_g2.write(writer)?;                
-        self.neg_gamma_g2.write(writer)?;        
-        self.neg_delta_g2.write(writer)?; 
-                
+    {
+        self.alpha_g1_beta_g2.write(writer)?;
+        self.neg_gamma_g2.write(writer)?;
+        self.neg_delta_g2.write(writer)?;
+
         writer.write_u32::<BigEndian>(self.ic.len() as u32)?;
 
         for ic in &self.ic {
             writer.write_all(ic.into_uncompressed().as_ref())?;
-        }        
+        }
 
         Ok(())
     }
@@ -417,27 +595,27 @@ impl<E: Engine> PreparedVerifyingKey<E> {
         mut reader: R
     ) -> io::Result<Self>
     {
-        let mut g1_repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();        
-        let alpha_g1_beta_g2 = E::Fqk::read(&mut reader)?; 
+        let mut g1_repr = <E::G1Affine as CurveAffine>::Uncompressed::empty();
+        let alpha_g1_beta_g2 = E::Fqk::read(&mut reader)?;
 
-        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;        
+        let neg_gamma_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;
         let neg_delta_g2 = <E::G2Affine as CurveAffine>::Prepared::read(&mut reader)?;
 
         let ic_len = reader.read_u32::<BigEndian>()? as usize;
 
-        let mut ic = vec![];        
+        let mut ic = vec![];
 
-        for _ in 0..ic_len {            
-            reader.read(g1_repr.as_mut())?;            
+        for _ in 0..ic_len {
+            reader.read(g1_repr.as_mut())?;
             let g1 = g1_repr
                         .into_affine()
                         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
-                        .and_then(|e| if e.is_zero() {                            
+                        .and_then(|e| if e.is_zero() {
                             Err(io::Error::new(io::ErrorKind::InvalidData, "point at infinity"))
                         } else {
                             Ok(e)
                         })?;
-                        
+
             ic.push(g1);
         }
 
@@ -548,7 +726,7 @@ mod test_with_bls12_381 {
     use pairing::bls12_381::{Bls12, Fr};
     use std::path::Path;
     use std::fs::File;
-    use std::io::{BufReader, Read}; 
+    use std::io::{BufReader, Read};
 
     #[test]
     fn serialization() {
@@ -636,21 +814,55 @@ mod test_with_bls12_381 {
 
     #[test]
     fn test_prepared_vk_rw() {
-        let vk_path = Path::new("./verification.params"); 
+        let vk_path = Path::new("./verification.params");
         let vk_file = File::open(&vk_path).unwrap();
         let mut vk_reader = BufReader::new(vk_file);
 
         let mut buf_vk = vec![];
-        vk_reader.read_to_end(&mut buf_vk).unwrap();        
-        
+        vk_reader.read_to_end(&mut buf_vk).unwrap();
+
 
         let prepared_vk_a = PreparedVerifyingKey::<Bls12>::read(&mut &buf_vk[..]).unwrap();
 
         let mut buf = vec![];
         prepared_vk_a.write(&mut &mut buf).unwrap();
 
-        let prepared_vk_b = PreparedVerifyingKey::<Bls12>::read(&mut &buf[..]).unwrap();        
+        let prepared_vk_b = PreparedVerifyingKey::<Bls12>::read(&mut &buf[..]).unwrap();
 
         assert_eq!(prepared_vk_a, prepared_vk_b);
+    }
+
+    #[test]
+    fn test_parameter_rw() {
+        let pk_path = Path::new("./proving.params");
+        let pk_file = File::open(&pk_path).unwrap();
+        let mut pk_reader = BufReader::new(pk_file);
+
+        let mut buf_pk = vec![];
+        pk_reader.read_to_end(&mut buf_pk).unwrap();
+
+        println!("begin: {:?}", buf_pk.len());
+
+        let prepared_pk_a = Parameters::<Bls12>::read(&mut &buf_pk[..], true).unwrap();
+
+        let mut buf = vec![];
+        prepared_pk_a.write(&mut &mut buf).unwrap();
+
+        let prepared_pk_b = Parameters::<Bls12>::read(&mut &buf[..], true).unwrap();
+
+        assert_eq!(prepared_pk_a, prepared_pk_b);
+    }
+
+    #[test]
+    fn test_gen_parameter() {
+        let pk_path = Path::new("./proving.params");
+        let pk_file = File::open(&pk_path).unwrap();
+        let mut pk_reader = BufReader::new(pk_file);
+
+        let mut buf_pk = vec![];
+        pk_reader.read_to_end(&mut buf_pk).unwrap();
+        let mut tmp = &buf_pk[..3148136];
+
+        let params_vk_a = VkHParameters::<Bls12>::read::<_>(&mut &tmp[..], true).unwrap();
     }
 }
