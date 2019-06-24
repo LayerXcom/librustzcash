@@ -545,9 +545,7 @@ impl<E: Engine> Parameters<E> {
         }
 
         let mut tmp = Vec::new();
-        let k = reader.read_to_end(&mut tmp).unwrap();
-        println!("len_tmp: {:?}, a: {:?}", tmp.len(), k);
-
+        let k = reader.read_to_end(&mut tmp).unwrap();        
 
         Ok(Parameters {
             vk: vk,
@@ -861,8 +859,13 @@ mod test_with_bls12_381 {
 
         let mut buf_pk = vec![];
         pk_reader.read_to_end(&mut buf_pk).unwrap();
-        let mut tmp = &buf_pk[..3148136];
+        let mut vk_h = &buf_pk[..3148136];
+        // let mut l = &buf_pk[3148136..]
+        // let mut a = &buf_pk[]
+        // let mut b_g1 = &buf_pk[]
+        // let mut b_g2 = &buf_pk[2206852..]
 
-        let params_vk_a = VkHParameters::<Bls12>::read::<_>(&mut &tmp[..], true).unwrap();
+        let params_vk_h = VkHParameters::<Bls12>::read::<_>(&mut &vk_h[..], true).unwrap();
+        // let params_l = LParameters::<Bls12>::read::<_>(&mut &)
     }
 }
