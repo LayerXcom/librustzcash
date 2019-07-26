@@ -545,7 +545,7 @@ impl<E: Engine> Parameters<E> {
         }
 
         let mut tmp = Vec::new();
-        let k = reader.read_to_end(&mut tmp).unwrap();        
+        let k = reader.read_to_end(&mut tmp).unwrap();
 
         Ok(Parameters {
             vk: vk,
@@ -558,7 +558,7 @@ impl<E: Engine> Parameters<E> {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct PreparedVerifyingKey<E: Engine> {
     /// Pairing result of alpha*beta
     alpha_g1_beta_g2: E::Fqk,
