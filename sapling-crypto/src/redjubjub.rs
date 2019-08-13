@@ -35,10 +35,10 @@ pub struct Signature {
     pub sbar: [u8; 32],
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PrivateKey<E: JubjubEngine>(pub E::Fs);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PublicKey<E: JubjubEngine>(pub Point<E, Unknown>);
 
 impl Signature {
