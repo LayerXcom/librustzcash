@@ -50,8 +50,8 @@ impl Fq2 {
         let mut buf = [0u8; 96];
         reader.read_exact(&mut buf[..]).unwrap();
 
-        repr0.read_be(&mut &buf[..])?;
-        repr1.read_be(&mut &buf[..])?;
+        repr0.read_be(&mut &buf[..48])?;
+        repr1.read_be(&mut &buf[48..])?;
 
         Fq::from_repr(repr0).and_then(|r0|
             Fq::from_repr(repr1).and_then(|r1|
