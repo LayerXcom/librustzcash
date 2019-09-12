@@ -148,7 +148,7 @@ fn test_g1_uncompressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[0..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[0..]).unwrap();
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
             assert_eq!(coordinate, "x coordinate");
@@ -159,7 +159,7 @@ fn test_g1_uncompressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[48..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[48..]).unwrap();
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
             assert_eq!(coordinate, "y coordinate");
@@ -172,7 +172,7 @@ fn test_g1_uncompressed_invalid_vectors() {
         let m = Fq::zero().into_repr();
 
         let mut o = o;
-        m.write_be(&mut o.as_mut()[0..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[0..]).unwrap();
 
         if let Err(GroupDecodingError::NotOnCurve) = o.into_affine() {
             // :)
@@ -193,8 +193,8 @@ fn test_g1_uncompressed_invalid_vectors() {
 
             if let Some(y) = x3b.sqrt() {
                 // We know this is on the curve, but it's likely not going to be in the correct subgroup.
-                x.into_repr().write_be(&mut o.as_mut()[0..]).unwrap();
-                y.into_repr().write_be(&mut o.as_mut()[48..]).unwrap();
+                x.into_repr().write_be(&mut &mut o.as_mut()[0..]).unwrap();
+                y.into_repr().write_be(&mut &mut o.as_mut()[48..]).unwrap();
 
                 if let Err(GroupDecodingError::NotInSubgroup) = o.into_affine() {
                     break;
@@ -262,7 +262,7 @@ fn test_g2_uncompressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[0..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[0..]).unwrap();
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
             assert_eq!(coordinate, "x coordinate (c1)");
@@ -273,7 +273,7 @@ fn test_g2_uncompressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[48..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[48..]).unwrap();
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
             assert_eq!(coordinate, "x coordinate (c0)");
@@ -284,7 +284,7 @@ fn test_g2_uncompressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[96..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[96..]).unwrap();
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
             assert_eq!(coordinate, "y coordinate (c1)");
@@ -295,7 +295,7 @@ fn test_g2_uncompressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[144..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[144..]).unwrap();
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
             assert_eq!(coordinate, "y coordinate (c0)");
@@ -308,8 +308,8 @@ fn test_g2_uncompressed_invalid_vectors() {
         let m = Fq::zero().into_repr();
 
         let mut o = o;
-        m.write_be(&mut o.as_mut()[0..]).unwrap();
-        m.write_be(&mut o.as_mut()[48..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[0..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[48..]).unwrap();
 
         if let Err(GroupDecodingError::NotOnCurve) = o.into_affine() {
             // :)
@@ -333,10 +333,10 @@ fn test_g2_uncompressed_invalid_vectors() {
 
             if let Some(y) = x3b.sqrt() {
                 // We know this is on the curve, but it's likely not going to be in the correct subgroup.
-                x.c1.into_repr().write_be(&mut o.as_mut()[0..]).unwrap();
-                x.c0.into_repr().write_be(&mut o.as_mut()[48..]).unwrap();
-                y.c1.into_repr().write_be(&mut o.as_mut()[96..]).unwrap();
-                y.c0.into_repr().write_be(&mut o.as_mut()[144..]).unwrap();
+                x.c1.into_repr().write_be(&mut &mut o.as_mut()[0..]).unwrap();
+                x.c0.into_repr().write_be(&mut &mut o.as_mut()[48..]).unwrap();
+                y.c1.into_repr().write_be(&mut &mut o.as_mut()[96..]).unwrap();
+                y.c0.into_repr().write_be(&mut &mut o.as_mut()[144..]).unwrap();
 
                 if let Err(GroupDecodingError::NotInSubgroup) = o.into_affine() {
                     break;
@@ -404,7 +404,7 @@ fn test_g1_compressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[0..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[0..]).unwrap();
         o.as_mut()[0] |= 0b1000_0000;
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
@@ -427,7 +427,7 @@ fn test_g1_compressed_invalid_vectors() {
             if let Some(_) = x3b.sqrt() {
                 x.add_assign(&Fq::one());
             } else {
-                x.into_repr().write_be(&mut o.as_mut()[0..]).unwrap();
+                x.into_repr().write_be(&mut &mut o.as_mut()[0..]).unwrap();
                 o.as_mut()[0] |= 0b1000_0000;
 
                 if let Err(GroupDecodingError::NotOnCurve) = o.into_affine() {
@@ -451,7 +451,7 @@ fn test_g1_compressed_invalid_vectors() {
 
             if let Some(_) = x3b.sqrt() {
                 // We know this is on the curve, but it's likely not going to be in the correct subgroup.
-                x.into_repr().write_be(&mut o.as_mut()[0..]).unwrap();
+                x.into_repr().write_be(&mut &mut o.as_mut()[0..]).unwrap();
                 o.as_mut()[0] |= 0b1000_0000;
 
                 if let Err(GroupDecodingError::NotInSubgroup) = o.into_affine() {
@@ -520,7 +520,7 @@ fn test_g2_compressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[0..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[0..]).unwrap();
         o.as_mut()[0] |= 0b1000_0000;
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
@@ -532,7 +532,7 @@ fn test_g2_compressed_invalid_vectors() {
 
     {
         let mut o = o;
-        m.write_be(&mut o.as_mut()[48..]).unwrap();
+        m.write_be(&mut &mut o.as_mut()[48..]).unwrap();
         o.as_mut()[0] |= 0b1000_0000;
 
         if let Err(GroupDecodingError::CoordinateDecodingError(coordinate, _)) = o.into_affine() {
@@ -561,8 +561,8 @@ fn test_g2_compressed_invalid_vectors() {
             if let Some(_) = x3b.sqrt() {
                 x.add_assign(&Fq2::one());
             } else {
-                x.c1.into_repr().write_be(&mut o.as_mut()[0..]).unwrap();
-                x.c0.into_repr().write_be(&mut o.as_mut()[48..]).unwrap();
+                x.c1.into_repr().write_be(&mut &mut o.as_mut()[0..]).unwrap();
+                x.c0.into_repr().write_be(&mut &mut o.as_mut()[48..]).unwrap();
                 o.as_mut()[0] |= 0b1000_0000;
 
                 if let Err(GroupDecodingError::NotOnCurve) = o.into_affine() {
@@ -592,8 +592,8 @@ fn test_g2_compressed_invalid_vectors() {
 
             if let Some(_) = x3b.sqrt() {
                 // We know this is on the curve, but it's likely not going to be in the correct subgroup.
-                x.c1.into_repr().write_be(&mut o.as_mut()[0..]).unwrap();
-                x.c0.into_repr().write_be(&mut o.as_mut()[48..]).unwrap();
+                x.c1.into_repr().write_be(&mut &mut o.as_mut()[0..]).unwrap();
+                x.c0.into_repr().write_be(&mut &mut o.as_mut()[48..]).unwrap();
                 o.as_mut()[0] |= 0b1000_0000;
 
                 if let Err(GroupDecodingError::NotInSubgroup) = o.into_affine() {

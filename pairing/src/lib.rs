@@ -393,7 +393,7 @@ pub trait PrimeFieldRepr:
     fn shl(&mut self, amt: u32);
 
     /// Writes this `PrimeFieldRepr` as a big endian integer.
-    fn write_be<W: Write>(&self, mut writer: W) -> io::Result<()> {
+    fn write_be<W: Write>(&self, writer: &mut W) -> io::Result<()> {
         use byteorder::{BigEndian, WriteBytesExt};
 
         for digit in self.as_ref().iter().rev() {

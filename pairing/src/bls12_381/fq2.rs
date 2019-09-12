@@ -37,10 +37,10 @@ impl PartialOrd for Fq2 {
 }
 
 impl Fq2 {
-    pub fn write<W: ::io::Write>(&self, mut writer: &mut W) -> ::io::Result<()> {
-        self.c0.into_repr().write_be(&mut writer)?;
-        self.c1.into_repr().write_be(&mut writer)?;
-        Ok(())	        
+    pub fn write<W: ::io::Write>(&self, writer: &mut W) -> ::io::Result<()> {
+        self.c0.into_repr().write_be(writer)?;
+        self.c1.into_repr().write_be(writer)?;
+        Ok(())
     }
 
     pub fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
@@ -48,10 +48,10 @@ impl Fq2 {
         let mut repr1 = FqRepr::default();
 
         let mut buf = [0u8; 96];
-        reader.read_exact(&mut buf[..]).unwrap();             
+        reader.read_exact(&mut buf[..]).unwrap();
 
-        repr0.read_be(&mut &buf[..])?;        
-        repr1.read_be(&mut &buf[..])?;             
+        repr0.read_be(&mut &buf[..])?;
+        repr1.read_be(&mut &buf[..])?;
 
         Fq::from_repr(repr0).and_then(|r0|
             Fq::from_repr(repr1).and_then(|r1|
@@ -60,7 +60,7 @@ impl Fq2 {
                     c1: r1
                 })
             )
-        ).map_err(|e| ::io::Error::new(::io::ErrorKind::InvalidData, e))       
+        ).map_err(|e| ::io::Error::new(::io::ErrorKind::InvalidData, e))
     }
 
     /// Multiply this element by the cubic and quadratic nonresidue 1 + u.
@@ -91,7 +91,7 @@ impl Rand for Fq2 {
     }
 }
 
-impl Field for Fq2 {    
+impl Field for Fq2 {
     fn zero() -> Self {
         Fq2 {
             c0: Fq::zero(),

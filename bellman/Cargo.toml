@@ -18,6 +18,9 @@ crossbeam = { version = "0.7.1", optional = true }
 pairing = { path = "../pairing" }
 byteorder = "1"
 
+[dev-dependencies]
+hex = "0.3.2"
+
 [features]
 default = []
 multithread = ["futures-cpupool", "num_cpus", "crossbeam"]

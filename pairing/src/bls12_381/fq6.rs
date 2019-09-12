@@ -33,13 +33,13 @@ impl Fq6 {
         self.c1.write(writer)?;
         self.c2.write(writer)?;
         Ok(())
-    }	    
+    }
 
-    pub fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {              
+    pub fn read<R: ::io::Read>(reader: &mut R) -> ::io::Result<Self> {
         let a = Fq2::read(reader)?;
         let b = Fq2::read(reader)?;
-        let c = Fq2::read(reader)?;       
-       
+        let c = Fq2::read(reader)?;
+
         Ok(Fq6{
             c0: a,
             c1: b,
