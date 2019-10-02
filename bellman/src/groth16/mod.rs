@@ -4,15 +4,14 @@ use pairing::{
     EncodedPoint,
     RW
 };
-
 use ::{
     SynthesisError
 };
-
 use multiexp::SourceBuilder;
 use std::io::{self, Read, Write};
 use std::sync::Arc;
 use byteorder::{BigEndian, WriteBytesExt, ReadBytesExt};
+use crate::multicore::Worker;
 
 #[cfg(test)]
 mod tests;
@@ -841,12 +840,12 @@ mod test_with_bls12_381 {
 
         println!("begin: {:?}", buf_pk.len());
 
-        let prepared_pk_a = Parameters::<Bls12>::read(&mut &buf_pk[..], true).unwrap();
+        let prepared_pk_a = Parameters::<Bls12>::read(&buf_pk[..], true).unwrap();
 
         let mut buf = vec![];
         prepared_pk_a.write(&mut &mut buf).unwrap();
 
-        let prepared_pk_b = Parameters::<Bls12>::read(&mut &buf[..], true).unwrap();
+        let prepared_pk_b = Parameters::<Bls12>::read(&buf[..], true).unwrap();
 
         assert_eq!(prepared_pk_a, prepared_pk_b);
     }
